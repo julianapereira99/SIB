@@ -23,6 +23,10 @@ def label_gen(n):
 
     return [gen() for _ in range(n)]
 
+def l2_distance(x,y):
+    dist = ((x-y)**2).sum(axis=1)
+    return dist   
+
 
 def summary(dataset, format='df'):
     """ Returns the statistics of a dataset(mean, std, max, min)
