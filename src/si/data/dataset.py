@@ -1,7 +1,9 @@
 import numpy as np
-from ..util.util import label_gen
+import pandas as pd
 
-__all__ = ['Dataset']
+from si.util.util import label_gen
+
+__all__ = ['Dataset', 'summary']
 
 
 class Dataset:
@@ -47,19 +49,18 @@ class Dataset:
         :return: [description]
         :rtype: [type]
         """
-
-        if ylabel and ylabel in df.columns:
+        if ylabel is not None and ylabel in df.columns:
             X = df.loc[:, df.columns != ylabel].to_numpy()
             Y = df.loc[:, ylabel].to_numpy()
-            xnames = list(df.columns)
-            xnames.remove(ylabel)
+            xnames = df.columns.tolist().remove(ylabel)
             yname = ylabel
         else:
             X = df.to_numpy()
             Y = None
-            xnames = list(df.columns)
+            xnames = df.columns.tolist()
             yname = None
         return cls(X, Y, xnames, yname)
+
 
     def __len__(self):
         """Returns the number of data points."""
@@ -85,15 +86,16 @@ class Dataset:
         :param sep: The fields separator, defaults to ","
         :type sep: str, optional
         """
+
         fullds = np.hstack((self.X, self.Y.reshape(len(self.Y), 1)))
         np.savetxt(filename, fullds, delimiter=sep)
 
     def toDataframe(self):
         """ Converts the dataset into a pandas DataFrame"""
-        import pandas as pd
-        if self.Y is not None:
+        if self.hasLabel():
+            if type(self.X) is tuple: self.X = self.X[0]
             fullds = np.hstack((self.X, self.Y.reshape(len(self.Y), 1)))
-            columns = self._xnames[:]+[self._yname]
+            columns = self._xnames[:] + [self._yname]
         else:
             fullds = self.X.copy()
             columns = self._xnames[:]
@@ -101,3 +103,38 @@ class Dataset:
 
     def getXy(self):
         return self.X, self.Y
+
+def summary(dataset, format='df'):
+    """ Returns the statistics of a dataset(mean, std, max, min)
+    :param dataset: A Dataset object
+    :type dataset: si.data.Dataset
+    :param format: Output format ('df':DataFrame, 'dict':dictionary ), defaults to 'df'
+    :type format: str, optional
+    """
+    if dataset.hasLabel():
+        fullds = np.hstack([dataset.X, np.reshape(dataset.Y, (-1, 1))])
+        columns = dataset._xnames[:]+[dataset._yname]
+    else:
+        fullds = dataset.X
+        columns = dataset._xnames[:]
+    stats = {}
+    for i in range(fullds.shape[1]):
+        try:
+            _means = np.mean(fullds[:, i], axis=0)
+            _vars = np.var(fullds[:, i], axis=0)
+            _maxs = np.max(fullds[:, i], axis=0)
+            _mins = np.min(fullds[:, i], axis=0)
+        except Exception:
+            _means = _vars = _maxs = _mins = np.NAN
+        stat = {'mean': _means,
+                'var': _vars,
+                'min': _mins,
+                'max': _maxs
+                }
+        stats[columns[i]] = stat
+    if format == 'df':
+        import pandas as pd
+        df = pd.DataFrame(stats)
+        return df
+    else:
+        return stats

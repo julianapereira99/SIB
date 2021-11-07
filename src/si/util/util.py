@@ -1,9 +1,12 @@
 import itertools
 
 # Y is reserved to idenfify dependent variables
+import numpy as np
+import pandas as pd
+
 ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXZ'
 
-__all__ = ['label_gen', 'summary']
+__all__ = ['label_gen']
 
 
 def label_gen(n):
@@ -23,17 +26,7 @@ def label_gen(n):
 
     return [gen() for _ in range(n)]
 
-def l2_distance(x,y):
-    dist = ((x-y)**2).sum(axis=1)
-    return dist   
 
-
-def summary(dataset, format='df'):
-    """ Returns the statistics of a dataset(mean, std, max, min)
-
-    :param dataset: A Dataset object
-    :type dataset: si.data.Dataset
-    :param format: Output format ('df':DataFrame, 'dict':dictionary ), defaults to 'df'
-    :type format: str, optional
-    """
-    pass
+def l2_distance(x, y):
+    dist = ((x -y) ** 2).sum(axis=1)
+    return dist

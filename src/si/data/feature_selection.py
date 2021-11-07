@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 18 16:36:01 2021
-
-@author: Juliana
-"""
-
 import numpy as np
 from scipy import stats
 from copy import copy
@@ -13,7 +6,7 @@ from si.data import Dataset
 
 class VarianceThreshold:
 
-	def _init_(self, threshold=0):
+	def __init__(self, threshold=0):
 		if threshold < 0:
 			warnings.warn('The threshold must be a non-negative value')
 			threshold = 0
@@ -37,10 +30,13 @@ class VarianceThreshold:
 			from .dataset import Dataset
 			return Dataset(X_trans, copy(dataset.Y), xnames, copy(dataset._yname))
 
+	def fit_transform(self, dataset, inline=False):
+		self.fit(dataset)
+		return self.transform(dataset, inline)
 
 class selectKbest:
-#
-	def _init_(self, scoring_function, k):
+
+	def __init__(self, k, scoring_function):
 		self.scor_func = scoring_function
 		self.k = k
 
@@ -49,7 +45,7 @@ class selectKbest:
 
 	def transform(self, dataset, inline=False):
 		x, x_names = copy(dataset.X), copy(dataset._xnames)
-		indexes = self.f.argsort()[len(self.f)-self.k:]
+		indexes = sorted(self.f.argsort()[len(self.f)-self.k:])
 		new_data = x[:, indexes]
 		xnames = [x_names[i] for i in indexes]
 		if inline:
@@ -66,7 +62,7 @@ class selectKbest:
 
 
 def f_classification(dataset):
-    m scipy.stats import f_oneway
+	from scipy.stats import f_oneway
 	x, y = dataset.getXy()
 	arguments = [x[cat == y, :] for cat in np.unique(y)]
 	f_s, p = f_oneway(*arguments)
@@ -90,4 +86,5 @@ def f_regression(dataset):
 	f_r = sq_corr/(1-sq_corr)*degree_freedom
 	p = f.sf(f_r, 1, degree_freedom)
 	return f_r, p
-        
+
+
