@@ -90,4 +90,3 @@ class GridSearchCV:
 			data['Test'+str(i+1)] = test
 		return pd.DataFrame(data)
 
-		# falta fazer o resto da função
