@@ -155,7 +155,7 @@ class NN(Modelo):
         self.loss = mse
         self.loss_prime = mse_prime
 
-    def fit(self, dataset=None):
+    def fit(self, dataset):
         self.dataset = dataset
         self.history = dict()
         for epoch in range(self.epochs):
@@ -166,12 +166,12 @@ class NN(Modelo):
                 output = layer.forward(output)
 
             # backward propagation
-            error = self.loss_prime(dataset.Y, output)
+            error = self.loss_prime(dataset.y, output)
             for layer in reversed(self.layers):
                 error = layer.backward(error, self.lr)
 
             # calculate average error all samples
-            err = self.loss(dataset.Y, output)
+            err = self.loss(dataset.y, output)
             self.history[epoch] = err
 
             if self.verbose:
