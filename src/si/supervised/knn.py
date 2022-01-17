@@ -38,8 +38,6 @@ class Knn:
 			prediction = sum(values)/len(values)
 		return prediction
 
-	def cost(self, X=None, y=None):
-		X = X if X is not None else self.dataset.X
-		y = y if y is not None else self.dataset.Y
-		y_pred = np.ma.apply_along_axis(self.predict, axis=0, arr=X.T)
-		return accuracy_score(y, y_pred)
+	def cost(self):
+		y_pred = np.ma.apply_along_axis(self.predict, axis=0, arr=self.dataset.X.T)
+		return accuracy_score(self.dataset.Y, y_pred)
